@@ -558,7 +558,14 @@ local servers = {
   -- gopls = {},
   -- pyright = {},
   nimls = {},
-  rust_analyzer = {},
+  rust_analyzer = {
+    cargo = {
+      targetDir = true
+    },
+    procMacro = {
+      enable = true
+    },
+  },
   -- tsserver = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
 
@@ -596,6 +603,53 @@ mason_lspconfig.setup_handlers {
     }
   end,
 }
+-- AutoHotkey LSP start
+local function custom_attach(client, bufnr)
+  require("lsp_signature").on_attach({
+    bind = true,
+    use_lspsaga = false,
+    floating_window = true,
+    fix_pos = true,
+    hint_enable = true,
+    hi_parameter = "Search",
+    handler_opts = { "double" },
+  })
+end
+
+local ahk2_configs = {
+  autostart = true,
+  cmd = {
+    "node",
+    vim.fn.expand("~/AppData/Local/nvim/other/vscode-autohotkey2-lsp/server/dist/server.js"),
+    "--stdio"
+  },
+  filetypes = { "ahk", "autohotkey", "ah2" },
+  init_options = {
+    locale = "en-us",
+    InterpreterPath = "C:/Users/askar/scoop/apps/autohotkey/current/v2/AutoHotkey64.exe",
+    -- Same as initializationOptions for Sublime Text4, convert json literal to lua dictionary literal
+  },
+  single_file_support = true,
+  flags = { debounce_text_changes = 500 },
+  capabilities = capabilities,
+  on_attach = custom_attach,
+}
+local configs = require "lspconfig.configs"
+configs["ahk2"] = { default_config = ahk2_configs }
+local nvim_lsp = require("lspconfig")
+nvim_lsp.ahk2.setup({})
+-- end AutoHotkey LSP
+
+
+-- Nushell LSP start
+local nushell_config = {
+  cmd = { "nu", "--lsp" },
+  filetypes = { "nu" },
+  on_attach = custom_attach,
+}
+configs["nu"] = { default_config = nushell_config }
+nvim_lsp.nu.setup({})
+-- end Nushell LSP
 
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`
