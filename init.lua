@@ -56,6 +56,14 @@ require('lazy').setup({
   },
 
   {
+    "jay-babu/mason-nvim-dap.nvim",
+    dependencies = {
+      "williamboman/mason.nvim",
+      "mfussenegger/nvim-dap",
+    }
+  },
+
+  {
     -- Autocompletion
     'hrsh7th/nvim-cmp',
     dependencies = {
@@ -201,7 +209,7 @@ require('lazy').setup({
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
 
-  -- Fuzzy Finder (files, lsp, etc)
+  -- Fuzzy Finder (files, lsp, et)
   {
     'nvim-telescope/telescope.nvim',
     branch = '0.1.x',
@@ -244,6 +252,15 @@ require('lazy').setup({
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   -- { import = 'custom.plugins' },
+  {
+    "okuuva/auto-save.nvim",
+    cmd = "ASToggle",                         -- optional for lazy loading on command
+    event = { "InsertLeave", "TextChanged" }, -- optional for lazy loading on trigger events
+    opts = {
+      -- your config goes here
+      -- or just leave it empty :)
+    },
+  },
 }, {})
 
 -- [[ Setting options ]]
@@ -557,7 +574,7 @@ local servers = {
   -- clangd = {},
   -- gopls = {},
   -- pyright = {},
-  nimls = {},
+  nim_langserver = {},
   rust_analyzer = {
     cargo = {
       targetDir = true
@@ -632,7 +649,7 @@ local ahk2_configs = {
   single_file_support = true,
   flags = { debounce_text_changes = 500 },
   capabilities = capabilities,
-  on_attach = custom_attach,
+  on_attach = on_attach,
 }
 local configs = require "lspconfig.configs"
 configs["ahk2"] = { default_config = ahk2_configs }
@@ -645,11 +662,52 @@ nvim_lsp.ahk2.setup({})
 local nushell_config = {
   cmd = { "nu", "--lsp" },
   filetypes = { "nu" },
-  on_attach = custom_attach,
+  on_attach = on_attach,
 }
 configs["nu"] = { default_config = nushell_config }
 nvim_lsp.nu.setup({})
 -- end Nushell LSP
+
+-- [[ Configure DAP ]]
+
+require("mason-nvim-dap").setup({
+    ensure_installed = { "codelldb" }
+})
+
+local dap = require('dap')
+dap.adapters.codelldb = {
+  type = 'server',
+  port = "${port}",
+  executable = {
+    -- CHANGE THIS to your path!
+    command = vim.fn.stdpath('data') .. '/mason/bin/codelldb.cmd',
+    -- command = "codelldb",
+    args = {"--port", "${port}"},
+
+    -- On windows you may have to uncomment this:
+    -- detached = false,
+  }
+}
+
+dap.adapters.lldb = dap.adapters.codelldb
+-- dap.configurations.rust = {
+--   {
+--     name = "Launch file",
+--     type = "codelldb",
+--     request = "launch",
+--     program = function()
+--       return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+--     end,
+--     cwd = '${workspaceFolder}',
+--     stopOnEntry = false,
+--   },
+-- }
+
+local kmap = vim.api.nvim_set_keymap
+
+kmap('n', '<F5>', [[:lua require'dap'.continue()<CR>]], {})
+-- Press CTRL + b to toggle regular breakpoint
+kmap('n', '<C-b>', [[:lua require'dap'.toggle_breakpoint()<CR>]], {})
 
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`
