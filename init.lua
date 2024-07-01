@@ -578,6 +578,15 @@ require('lazy').setup({
           -- But for many setups, the LSP (`tsserver`) will work just fine
           -- tsserver = {},
           --
+          nim_langserver = {},
+          rust_analyzer = {
+            cargo = {
+              targetDir = true
+            },
+            procMacro = {
+              enable = true
+            },
+          },
           lua_ls = {
             -- cmd = {...},
             -- filetypes = { ...},
