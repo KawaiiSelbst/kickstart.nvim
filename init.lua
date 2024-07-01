@@ -581,10 +581,15 @@ require('lazy').setup({
           nim_langserver = {},
           rust_analyzer = {
             cargo = {
-              targetDir = true
+              targetDir = true,
             },
             procMacro = {
-              enable = true
+              enable = true,
+            },
+            rustfmt = {
+              rangeFormatting = {
+                enable = true,
+              },
             },
           },
           lua_ls = {
@@ -640,7 +645,7 @@ require('lazy').setup({
       {
         '<leader>f',
         function()
-          require('conform').format { async = true, lsp_fallback = true }
+          require('conform').format { async = true, lsp_format = 'fallback' }
         end,
         mode = '',
         desc = '[F]ormat buffer',
@@ -660,6 +665,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        -- rust = { 'rust_analyzer' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -701,7 +707,7 @@ require('lazy').setup({
       'saadparwaiz1/cmp_luasnip',
 
       -- Adds other completion capabilities.
-      --  nvim-cmp does not ship with all sources by default. They are split
+      -- nvim-cmp does not ship with all sources by default. They are split
       --  into multiple repos for maintenance purposes.
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
@@ -778,24 +784,6 @@ require('lazy').setup({
           { name = 'path' },
         },
       }
-    end,
-  },
-
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
-
-      -- You can configure highlights by doing something like:
-      vim.cmd.hi 'Comment gui=none'
     end,
   },
 
@@ -882,9 +870,9 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
@@ -894,6 +882,29 @@ require('lazy').setup({
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
   -- { import = 'custom.plugins' },
+  {
+    'okuuva/auto-save.nvim',
+    cmd = 'ASToggle', -- optional for lazy loading on command
+    event = { 'InsertLeave', 'TextChanged' }, -- optional for lazy loading on trigger events
+    opts = {
+      -- your config goes here
+      -- or just leave it empty :)
+    },
+  },
+  {
+    'Mofiqul/vscode.nvim',
+    priority = 1000,
+    lazy = false,
+    config = function()
+      require('vscode').setup {
+        style = 'dark', -- dark, darker, cool, deep, warm, warmer, light
+        transparent = true,
+        italic_comments = true,
+        disable_nvimtree_bg = true,
+      }
+      require('vscode').load()
+    end,
+  },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
